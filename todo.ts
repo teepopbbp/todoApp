@@ -10,6 +10,8 @@ let tasks: Task[] = []
 
 let idTrack = 1
 
+let isExited = false
+
 const addTask = (tasks: Task[], taskName: string) => {
     tasks.push(
         {
@@ -50,10 +52,13 @@ const rl = readline.createInterface (
 )
 
 rl.on('line', (line: string) => {
-    if (line.startsWith("add ")) {
+    if (isExited == true) {
+        return
+
+    } else if (line.startsWith("add ")) {
         let taskName: string = line.slice(4)
 
-        if(taskName == "") {
+        if (taskName == "") {
             console.log("error, nothing add")
 
         } else {
@@ -118,9 +123,10 @@ rl.on('line', (line: string) => {
         console.log(`help        -> แสดงรายการคําสั่ง`)
         console.log(`exit        -> ออกจากโปรแกรม`)
 
-    } else if (line == "exit") {
+    } else if (line == "exit" || line.startsWith("exit ")) {
         console.log(`Bye!`)
         process.stdin.unref()
+        isExited = true
         
     } else {
         console.log(`Unknown command. Type "help"`)
