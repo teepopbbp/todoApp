@@ -51,15 +51,26 @@ const rl = readline.createInterface (
     }
 )
 
-rl.on('line', (line: string) => {
+rl.on('line', (rawLine: string) => {
+    const line = rawLine.trim()
+    
+    const match = line.match(/^(\S+)(?:[ \t]+([\s\S]*))?$/)
+
+    if (match == null) {
+        return
+    }
+
+    const command = match[1]
+    const argument = match[2]
+
     if (isExited == true) {
         return
 
-    } else if (line.startsWith("add ")) {
-        let taskName: string = line.slice(4)
+    } else if (command == "add") {
+        let taskName = argument
 
-        if (taskName == "") {
-            console.log("error, nothing add")
+        if (!taskName) {
+            console.log("Invalid command. Usage: add <name>")
 
         } else {
             addTask(tasks, taskName);
@@ -68,8 +79,8 @@ rl.on('line', (line: string) => {
             idTrack++
         }
 
-    } else if (line.startsWith("done ")) {
-        let taskId: number = parseFloat(line.slice(4))
+    } else if (command == "done") {
+        let taskId = parseInt(argument)
 
         if (!isNaN(taskId)) {
             let index = tasks.findIndex((task) => task.id == taskId)
@@ -87,8 +98,8 @@ rl.on('line', (line: string) => {
             console.log(`Unknown command. Type "help"`)
         }
         
-    } else if (line.startsWith("delete ")) {
-        let taskId: number = parseFloat(line.slice(6))
+    } else if (command == "delete") {
+        let taskId = parseInt(argument)
 
         if (!isNaN(taskId)) {
             let index = tasks.findIndex((task) => task.id == taskId)
@@ -107,7 +118,7 @@ rl.on('line', (line: string) => {
             console.log(`Unknown command. Type "help"`)
         }
 
-    } else if (line == "list") {
+    } else if (command == "list") {
         if (tasks.length != 0) {
             list(tasks)
             
@@ -115,7 +126,7 @@ rl.on('line', (line: string) => {
             console.log("No todos")
         }
 
-    } else if (line == "help") {
+    } else if (command == "help") {
         console.log(`add <ชื่องาน> -> เพิ่มงานใหม่ แสดง id ที่ได้`)
         console.log(`list        -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]`)
         console.log(`done <id>   -> ทําเครื่องหมายว่าเสร็จ`)
@@ -123,7 +134,7 @@ rl.on('line', (line: string) => {
         console.log(`help        -> แสดงรายการคําสั่ง`)
         console.log(`exit        -> ออกจากโปรแกรม`)
 
-    } else if (line == "exit" || line.startsWith("exit ")) {
+    } else if (command == "exit") {
         console.log(`Bye!`)
         process.stdin.unref()
         isExited = true
