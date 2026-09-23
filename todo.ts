@@ -82,7 +82,10 @@ rl.on('line', (rawLine: string) => {
     } else if (command == "done") {
         let taskId = parseInt(argument)
 
-        if (!isNaN(taskId)) {
+        if (!taskId) {
+            console.log("Invalid command. Usage: done <id>")
+
+        } else if (!isNaN(taskId)) {
             let index = tasks.findIndex((task) => task.id == taskId)
 
             if (index >= 0) {
@@ -101,11 +104,13 @@ rl.on('line', (rawLine: string) => {
     } else if (command == "delete") {
         let taskId = parseInt(argument)
 
-        if (!isNaN(taskId)) {
+        if (!taskId) {
+            console.log("Invalid command. Usage: delete <id>")
+
+        } else if (!isNaN(taskId)) {
             let index = tasks.findIndex((task) => task.id == taskId)
             
             if (index >= 0) {
-
                 deleteTask(tasks, index)
 
                 console.log(`Deleted # ${taskId}`)
