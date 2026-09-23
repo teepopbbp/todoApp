@@ -165,6 +165,11 @@ rl.on('line', (rawLine: string) => {
         }
 
     } else if (command == "list") {
+        if (argument) {
+            console.log("Invalid command. Usage: list")
+            return
+        }
+        
         if (tasks.length != 0) {
             list(tasks)
             
@@ -173,6 +178,11 @@ rl.on('line', (rawLine: string) => {
         }
 
     } else if (command == "help") {
+        if (argument) {
+            console.log("Invalid command. Usage: help")
+            return
+        }
+
         console.log(`add <ชื่องาน> -> เพิ่มงานใหม่ แสดง id ที่ได้`)
         console.log(`list        -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]`)
         console.log(`done <id>   -> ทําเครื่องหมายว่าเสร็จ`)
@@ -181,6 +191,11 @@ rl.on('line', (rawLine: string) => {
         console.log(`exit        -> ออกจากโปรแกรม`)
 
     } else if (command == "exit") {
+        if (argument) {
+            console.log("Invalid command. Usage: exit")
+            return
+        }
+
         console.log(`Bye!`)
         process.stdin.unref()
         isExited = true
