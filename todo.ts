@@ -45,6 +45,23 @@ const list = (tasks: Task[]) => {
     }
 }
 
+const parseId = (argument: string) => {
+    let allowArgs = /^[0-9]+$/
+    const idMatch = argument.match(allowArgs)
+
+    const id = parseInt(argument)
+
+    if (idMatch == null) {
+        return null
+    }
+
+    if (id <= 0 || id > Number.MAX_SAFE_INTEGER){
+        return null
+    }
+
+    return id
+}
+
 const rl = readline.createInterface (
     {
         input: process.stdin,
@@ -80,6 +97,11 @@ rl.on('line', (rawLine: string) => {
         }
 
     } else if (command == "done") {
+        if (!argument) {
+            console.log("Invalid command. Usage: done <id>")
+            return
+        }
+
         let argumentSplit = argument.split(/[ \t]+/)
 
         if (argumentSplit.length != 1) {
@@ -87,7 +109,7 @@ rl.on('line', (rawLine: string) => {
             return
         }
 
-        let taskId = parseInt(argumentSplit[0])
+        let taskId = parseId(argumentSplit[0])
 
         if (!taskId) {
             console.log("Invalid command. Usage: done <id>")
@@ -98,7 +120,7 @@ rl.on('line', (rawLine: string) => {
             if (index >= 0) {
                 completeTask(tasks, index)
 
-                console.log(`Completed # ${taskId}`)
+                console.log(`Completed #${taskId}`)
 
             } else {
                 console.log(`Todo #${taskId} not found`)
@@ -109,6 +131,11 @@ rl.on('line', (rawLine: string) => {
         }
         
     } else if (command == "delete") {
+        if (!argument) {
+            console.log("Invalid command. Usage: delete <id>")
+            return
+        }
+
         let argumentSplit = argument.split(/[ \t]+/)
 
         if (argumentSplit.length != 1) {
@@ -116,7 +143,7 @@ rl.on('line', (rawLine: string) => {
             return
         }
 
-        let taskId = parseInt(argumentSplit[0])
+        let taskId = parseId(argumentSplit[0])
 
         if (!taskId) {
             console.log("Invalid command. Usage: delete <id>")
@@ -127,7 +154,7 @@ rl.on('line', (rawLine: string) => {
             if (index >= 0) {
                 deleteTask(tasks, index)
 
-                console.log(`Deleted # ${taskId}`)
+                console.log(`Deleted #${taskId}`)
 
             } else {
                 console.log(`Todo #${taskId} not found`)
