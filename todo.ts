@@ -80,7 +80,14 @@ rl.on('line', (rawLine: string) => {
         }
 
     } else if (command == "done") {
-        let taskId = parseInt(argument)
+        let argumentSplit = argument.split(/[ \t]+/)
+
+        if (argumentSplit.length != 1) {
+            console.log("Invalid command. Usage: done <id>")
+            return
+        }
+
+        let taskId = parseInt(argumentSplit[0])
 
         if (!taskId) {
             console.log("Invalid command. Usage: done <id>")
@@ -102,7 +109,14 @@ rl.on('line', (rawLine: string) => {
         }
         
     } else if (command == "delete") {
-        let taskId = parseInt(argument)
+        let argumentSplit = argument.split(/[ \t]+/)
+
+        if (argumentSplit.length != 1) {
+            console.log("Invalid command. Usage: delete <id>")
+            return
+        }
+
+        let taskId = parseInt(argumentSplit[0])
 
         if (!taskId) {
             console.log("Invalid command. Usage: delete <id>")
