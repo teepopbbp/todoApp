@@ -53,19 +53,33 @@ const list = (tasks: Task[], option?: string) => {
             if (optionSplit[1] == "name") {
                 displayTasks = sortList(displayTasks)
             }
+
+        } else if (optionSplit[0] = "--status") {
+
+            if (optionSplit[1] == "pending") {
+                displayTasks = displayTasks.filter((task) => !task.isCompleted)
+
+            } else if (optionSplit[1] == "completed") {
+                displayTasks = displayTasks.filter((task) => task.isCompleted)
+            }
         }
     }
 
-    for (let i = 0; i < displayTasks.length; i++) {
-        const task = displayTasks[i];
+    if (displayTasks.length != 0) {
+        for (let i = 0; i < displayTasks.length; i++) {
+            const task = displayTasks[i];
 
-        if (!task.isCompleted) {
-            console.log(`[ ] ${task.id}. ${task.name}`)
+            if (!task.isCompleted) {
+                console.log(`[ ] ${task.id}. ${task.name}`)
 
-        } else {
-            console.log(`[x] ${task.id}. ${task.name}`)
+            } else {
+                console.log(`[x] ${task.id}. ${task.name}`)
+            }
         }
+    } else {
+        console.log("No todos")
     }
+    
 }
 
 const parseId = (argument: string) => {
