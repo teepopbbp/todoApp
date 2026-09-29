@@ -236,12 +236,14 @@ rl.on('line', (rawLine: string) => {
             return
         }
 
-        console.log(`add <ชื่องาน> -> เพิ่มงานใหม่ แสดง id ที่ได้`)
-        console.log(`list        -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]`)
-        console.log(`done <id>   -> ทําเครื่องหมายว่าเสร็จ`)
-        console.log(`delete <id> -> ลบงาน`)
-        console.log(`help        -> แสดงรายการคําสั่ง`)
-        console.log(`exit        -> ออกจากโปรแกรม`)
+        console.log(`    add <ชื่องาน>                       -> เพิ่มงานใหม่ แสดง id ที่ได้
+    list                              -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]
+    list [--sort name]                -> แสดงงานทั้งหมดที่เรียงด้วบชื่อ พร้อมสถานะ [ ] / [x]
+    list [--status pending|completed] -> แสดงงานทั้งหมดที่มีสถานะเสร็จสิ้น หรือกำลังรอ พร้อมสถานะ [ ] / [x]
+    done <id>                         -> ทําเครื่องหมายว่าเสร็จ
+    delete <id>                       -> ลบงาน
+    help                              -> แสดงรายการคําสั่ง
+    exit                              -> ออกจากโปรแกรม`)
 
     } else if (command == "exit") {
         if (argument) {
