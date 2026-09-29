@@ -48,25 +48,40 @@ const list = (tasks: Task[], option?: string) => {
     if (option) {
         const optionSplit = option.split(/[ \t]+/)
         let i = 0
+        let isSorted = false
+        let isStatus = false
 
         while (i < optionSplit.length) {
-            if (optionSplit[i] == "--sort") {
-
+            if (optionSplit[i] == "--sort" && !isSorted) {
                 if (optionSplit[i+1] == "name") {
                     displayTasks = sortList(displayTasks)
+
+                } else {
+                    console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                    return
                 }
 
+                isSorted = true
                 i += 2
 
-            } else if (optionSplit[i] = "--status") {
+            } else if (optionSplit[i] == "--status" && !isStatus) {
                 if (optionSplit[i+1] == "pending") {
                     displayTasks = displayTasks.filter((task) => !task.isCompleted)
 
                 } else if (optionSplit[i+1] == "completed") {
                     displayTasks = displayTasks.filter((task) => task.isCompleted)
+
+                } else {
+                    console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                    return
                 }
 
+                isStatus = true
                 i += 2
+
+            } else {
+                console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                return
             }
         }
     }
