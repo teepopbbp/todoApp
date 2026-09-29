@@ -30,18 +30,41 @@ const deleteTask = (tasks: Task[], index: number) => {
     tasks.splice(index, 1)
 }
 
-const list = (tasks: Task[]) => {
-    for (let i = 0; i < tasks.length; i++) {
-        const task = tasks[i];
-        
-        if (task != undefined){
-            if (!task.isCompleted) {
-                console.log(`[ ] ${task.id}. ${task.name}`)
+const sortList = (displayTasks: Task[]) => {
+    let sortTasks = [...displayTasks].sort((a,b) => {
+        if (a.name < b.name) return -1
 
-            } else {
-                console.log(`[x] ${task.id}. ${task.name}`)
+        if (a.name > b.name) return 1
+
+        return 0
+    })
+
+    return sortTasks
+}
+
+const list = (tasks: Task[], option?: string) => {
+    let displayTasks = tasks
+
+    if (option) {
+        const optionSplit = option.split(/[ \t]+/)
+
+        if (optionSplit[0] == "--sort") {
+
+            if (optionSplit[1] == "name") {
+                displayTasks = sortList(displayTasks)
             }
-        }   
+        }
+    }
+
+    for (let i = 0; i < displayTasks.length; i++) {
+        const task = displayTasks[i];
+
+        if (!task.isCompleted) {
+            console.log(`[ ] ${task.id}. ${task.name}`)
+
+        } else {
+            console.log(`[x] ${task.id}. ${task.name}`)
+        }
     }
 }
 
@@ -165,13 +188,8 @@ rl.on('line', (rawLine: string) => {
         }
 
     } else if (command == "list") {
-        if (argument) {
-            console.log("Invalid command. Usage: list")
-            return
-        }
-        
         if (tasks.length != 0) {
-            list(tasks)
+            list(tasks, argument)
             
         } else {
             console.log("No todos")
