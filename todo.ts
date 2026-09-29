@@ -47,20 +47,26 @@ const list = (tasks: Task[], option?: string) => {
 
     if (option) {
         const optionSplit = option.split(/[ \t]+/)
+        let i = 0
 
-        if (optionSplit[0] == "--sort") {
+        while (i < optionSplit.length) {
+            if (optionSplit[i] == "--sort") {
 
-            if (optionSplit[1] == "name") {
-                displayTasks = sortList(displayTasks)
-            }
+                if (optionSplit[i+1] == "name") {
+                    displayTasks = sortList(displayTasks)
+                }
 
-        } else if (optionSplit[0] = "--status") {
+                i += 2
 
-            if (optionSplit[1] == "pending") {
-                displayTasks = displayTasks.filter((task) => !task.isCompleted)
+            } else if (optionSplit[i] = "--status") {
+                if (optionSplit[i+1] == "pending") {
+                    displayTasks = displayTasks.filter((task) => !task.isCompleted)
 
-            } else if (optionSplit[1] == "completed") {
-                displayTasks = displayTasks.filter((task) => task.isCompleted)
+                } else if (optionSplit[i+1] == "completed") {
+                    displayTasks = displayTasks.filter((task) => task.isCompleted)
+                }
+
+                i += 2
             }
         }
     }
