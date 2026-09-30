@@ -1,8 +1,8 @@
 import readline from "readline"
 
 type Task = {
-    name: string
     id: number
+    name: string
     isCompleted : boolean
 }
 
@@ -17,8 +17,8 @@ let isModuleLevel = false
 const addTask = (tasks: Task[], taskName: string, idTrack: number) => {
     tasks.push(
         {
-            name: taskName,
             id: idTrack,
+            name: taskName,
             isCompleted: false
         }   
     )
