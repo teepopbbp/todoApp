@@ -30,18 +30,76 @@ const deleteTask = (tasks: Task[], index: number) => {
     tasks.splice(index, 1)
 }
 
-const list = (tasks: Task[]) => {
-    for (let i = 0; i < tasks.length; i++) {
-        const task = tasks[i];
-        
-        if (task != undefined){
+const sortTasks = (displayTasks: Task[]) => {
+    let sortedTasks = [...displayTasks].sort((a,b) => {
+        if (a.name < b.name) return -1
+
+        if (a.name > b.name) return 1
+
+        return 0
+    })
+
+    return sortedTasks
+}
+
+const listTasks = (tasks: Task[], option?: string) => {
+    let displayTasks = tasks
+
+    if (option) {
+        const splitOptions = option.split(/[ \t]+/)
+        let i = 0
+        let hasSortOption = false
+        let hasStatusOption = false
+
+        while (i < splitOptions.length) {
+            if (splitOptions[i] == "--sort" && !hasSortOption) {
+                if (splitOptions[i+1] == "name") {
+                    displayTasks = sortTasks(displayTasks)
+
+                } else {
+                    console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                    return
+                }
+
+                hasSortOption = true
+                i += 2
+
+            } else if (splitOptions[i] == "--status" && !hasStatusOption) {
+                if (splitOptions[i+1] == "pending") {
+                    displayTasks = displayTasks.filter((task) => !task.isCompleted)
+
+                } else if (splitOptions[i+1] == "completed") {
+                    displayTasks = displayTasks.filter((task) => task.isCompleted)
+
+                } else {
+                    console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                    return
+                }
+
+                hasStatusOption = true
+                i += 2
+
+            } else {
+                console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                return
+            }
+        }
+    }
+
+    if (displayTasks.length != 0) {
+        for (let i = 0; i < displayTasks.length; i++) {
+            const task = displayTasks[i];
+
             if (!task.isCompleted) {
                 console.log(`[ ] ${task.id}. ${task.name}`)
 
             } else {
                 console.log(`[x] ${task.id}. ${task.name}`)
             }
-        }   
+        }
+
+    } else {
+        console.log("No todos")
     }
 }
 
@@ -165,13 +223,8 @@ rl.on('line', (rawLine: string) => {
         }
 
     } else if (command == "list") {
-        if (argument) {
-            console.log("Invalid command. Usage: list")
-            return
-        }
-        
         if (tasks.length != 0) {
-            list(tasks)
+            listTasks(tasks, argument)
             
         } else {
             console.log("No todos")
@@ -183,12 +236,14 @@ rl.on('line', (rawLine: string) => {
             return
         }
 
-        console.log(`add <ชื่องาน> -> เพิ่มงานใหม่ แสดง id ที่ได้`)
-        console.log(`list        -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]`)
-        console.log(`done <id>   -> ทําเครื่องหมายว่าเสร็จ`)
-        console.log(`delete <id> -> ลบงาน`)
-        console.log(`help        -> แสดงรายการคําสั่ง`)
-        console.log(`exit        -> ออกจากโปรแกรม`)
+        console.log(`    add <ชื่องาน>                       -> เพิ่มงานใหม่ แสดง id ที่ได้
+    list                              -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]
+    list [--sort name]                -> แสดงงานทั้งหมดที่เรียงด้วบชื่อ พร้อมสถานะ [ ] / [x]
+    list [--status pending|completed] -> แสดงงานทั้งหมดที่มีสถานะเสร็จสิ้น หรือกำลังรอ พร้อมสถานะ [ ] / [x]
+    done <id>                         -> ทําเครื่องหมายว่าเสร็จ
+    delete <id>                       -> ลบงาน
+    help                              -> แสดงรายการคําสั่ง
+    exit                              -> ออกจากโปรแกรม`)
 
     } else if (command == "exit") {
         if (argument) {
