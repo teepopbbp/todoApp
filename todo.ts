@@ -46,14 +46,14 @@ const listTasks = (tasks: Task[], option?: string) => {
     let displayTasks = tasks
 
     if (option) {
-        const optionSplit = option.split(/[ \t]+/)
+        const splitOptions = option.split(/[ \t]+/)
         let i = 0
-        let hasSorted = false
-        let hasStatus = false
+        let hasSortOption = false
+        let hasStatusOption = false
 
-        while (i < optionSplit.length) {
-            if (optionSplit[i] == "--sort" && !hasSorted) {
-                if (optionSplit[i+1] == "name") {
+        while (i < splitOptions.length) {
+            if (splitOptions[i] == "--sort" && !hasSortOption) {
+                if (splitOptions[i+1] == "name") {
                     displayTasks = sortTasks(displayTasks)
 
                 } else {
@@ -61,14 +61,14 @@ const listTasks = (tasks: Task[], option?: string) => {
                     return
                 }
 
-                hasSorted = true
+                hasSortOption = true
                 i += 2
 
-            } else if (optionSplit[i] == "--status" && !hasStatus) {
-                if (optionSplit[i+1] == "pending") {
+            } else if (splitOptions[i] == "--status" && !hasStatusOption) {
+                if (splitOptions[i+1] == "pending") {
                     displayTasks = displayTasks.filter((task) => !task.isCompleted)
 
-                } else if (optionSplit[i+1] == "completed") {
+                } else if (splitOptions[i+1] == "completed") {
                     displayTasks = displayTasks.filter((task) => task.isCompleted)
 
                 } else {
@@ -76,7 +76,7 @@ const listTasks = (tasks: Task[], option?: string) => {
                     return
                 }
 
-                hasStatus = true
+                hasStatusOption = true
                 i += 2
 
             } else {
