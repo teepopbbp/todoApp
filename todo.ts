@@ -12,7 +12,9 @@ let idTrack = 1
 
 let isExited = false
 
-const addTask = (tasks: Task[], taskName: string) => {
+let isModuleLevel = false
+
+const addTask = (tasks: Task[], taskName: string, idTrack: number) => {
     tasks.push(
         {
             name: taskName,
@@ -120,123 +122,164 @@ const parseId = (argument: string) => {
     return id
 }
 
-const rl = readline.createInterface (
-    {
-        input: process.stdin,
+export const createTodoList = () => {
+    isModuleLevel = true
+
+    let tasks:Task[] = []
+
+    let idTrack = 1
+
+    const add = (taskName: string) => {
+        const trimmedTaskName = taskName.trim()
+
+        if (trimmedTaskName === "") {
+            return null
+        }
+
+        return addTask(tasks, trimmedTaskName, idTrack++)
     }
-)
 
-rl.on('line', (rawLine: string) => {
-    const line = rawLine.trim()
-    
-    const match = line.match(/^(\S+)(?:[ \t]+([\s\S]*))?$/)
+    const done = (taskId: number) => {
+        let index = tasks.findIndex((task) => task.id == taskId)
 
-    if (match == null) {
-        return
-    }
-
-    const command = match[1]
-    const argument = match[2]
-
-    if (isExited == true) {
-        return
-
-    } else if (command == "add") {
-        let taskName = argument
-
-        if (!taskName) {
-            console.log("Invalid command. Usage: add <name>")
+        if (index >= 0) {
+            completeTask(tasks, index)
 
         } else {
-            addTask(tasks, taskName);
-        
-            console.log(`Added #${idTrack}: ${taskName}`)
-            idTrack++
-        }
-
-    } else if (command == "done") {
-        if (!argument) {
-            console.log("Invalid command. Usage: done <id>")
             return
         }
+    }
 
-        let argumentSplit = argument.split(/[ \t]+/)
+    const remove = (id: number) => {
+        return deleteTask(tasks, id - 1)
+    }
 
-        if (argumentSplit.length != 1) {
-            console.log("Invalid command. Usage: done <id>")
-            return
-        }
+    const list = () => {
+        return tasks
+    }
 
-        let taskId = parseId(argumentSplit[0])
+    return {add, done, delete: remove, list}
+}
 
-        if (!taskId) {
-            console.log("Invalid command. Usage: done <id>")
+setTimeout(() => {
+    if (!isModuleLevel) {
+        const rl = readline.createInterface (
+            {
+                input: process.stdin,
+            }
+        )
 
-        } else if (!isNaN(taskId)) {
-            let index = tasks.findIndex((task) => task.id == taskId)
+        rl.on('line', (rawLine: string) => {
+            const line = rawLine.trim()
+            
+            const match = line.match(/^(\S+)(?:[ \t]+([\s\S]*))?$/)
 
-            if (index >= 0) {
-                completeTask(tasks, index)
-
-                console.log(`Completed #${taskId}`)
-
-            } else {
-                console.log(`Todo #${taskId} not found`)
+            if (match == null) {
+                return
             }
 
-        } else {
-            console.log(`Unknown command. Type "help"`)
-        }
-        
-    } else if (command == "delete") {
-        if (!argument) {
-            console.log("Invalid command. Usage: delete <id>")
-            return
-        }
+            const command = match[1]
+            const argument = match[2]
 
-        let argumentSplit = argument.split(/[ \t]+/)
+            if (isExited == true) {
+                return
 
-        if (argumentSplit.length != 1) {
-            console.log("Invalid command. Usage: delete <id>")
-            return
-        }
+            } else if (command == "add") {
+                let taskName = argument
 
-        let taskId = parseId(argumentSplit[0])
+                if (!taskName) {
+                    console.log("Invalid command. Usage: add <name>")
 
-        if (!taskId) {
-            console.log("Invalid command. Usage: delete <id>")
+                } else {
+                    addTask(tasks, taskName, idTrack);
+                
+                    console.log(`Added #${idTrack}: ${taskName}`)
+                    idTrack++
+                }
 
-        } else if (!isNaN(taskId)) {
-            let index = tasks.findIndex((task) => task.id == taskId)
-            
-            if (index >= 0) {
-                deleteTask(tasks, index)
+            } else if (command == "done") {
+                if (!argument) {
+                    console.log("Invalid command. Usage: done <id>")
+                    return
+                }
 
-                console.log(`Deleted #${taskId}`)
+                let argumentSplit = argument.split(/[ \t]+/)
 
-            } else {
-                console.log(`Todo #${taskId} not found`)
-            }
+                if (argumentSplit.length != 1) {
+                    console.log("Invalid command. Usage: done <id>")
+                    return
+                }
 
-        } else {
-            console.log(`Unknown command. Type "help"`)
-        }
+                let taskId = parseId(argumentSplit[0])
 
-    } else if (command == "list") {
-        if (tasks.length != 0) {
-            listTasks(tasks, argument)
-            
-        } else {
-            console.log("No todos")
-        }
+                if (!taskId) {
+                    console.log("Invalid command. Usage: done <id>")
 
-    } else if (command == "help") {
-        if (argument) {
-            console.log("Invalid command. Usage: help")
-            return
-        }
+                } else if (!isNaN(taskId)) {
+                    let index = tasks.findIndex((task) => task.id == taskId)
 
-        console.log(`    add <ชื่องาน>                       -> เพิ่มงานใหม่ แสดง id ที่ได้
+                    if (index >= 0) {
+                        completeTask(tasks, index)
+
+                        console.log(`Completed #${taskId}`)
+
+                    } else {
+                        console.log(`Todo #${taskId} not found`)
+                    }
+
+                } else {
+                    console.log(`Unknown command. Type "help"`)
+                }
+                
+            } else if (command == "delete") {
+                if (!argument) {
+                    console.log("Invalid command. Usage: delete <id>")
+                    return
+                }
+
+                let argumentSplit = argument.split(/[ \t]+/)
+
+                if (argumentSplit.length != 1) {
+                    console.log("Invalid command. Usage: delete <id>")
+                    return
+                }
+
+                let taskId = parseId(argumentSplit[0])
+
+                if (!taskId) {
+                    console.log("Invalid command. Usage: delete <id>")
+
+                } else if (!isNaN(taskId)) {
+                    let index = tasks.findIndex((task) => task.id == taskId)
+                    
+                    if (index >= 0) {
+                        deleteTask(tasks, index)
+
+                        console.log(`Deleted #${taskId}`)
+
+                    } else {
+                        console.log(`Todo #${taskId} not found`)
+                    }
+
+                } else {
+                    console.log(`Unknown command. Type "help"`)
+                }
+
+            } else if (command == "list") {
+                if (tasks.length != 0) {
+                    listTasks(tasks, argument)
+                    
+                } else {
+                    console.log("No todos")
+                }
+
+            } else if (command == "help") {
+                if (argument) {
+                    console.log("Invalid command. Usage: help")
+                    return
+                }
+
+                console.log(`    add <ชื่องาน>                       -> เพิ่มงานใหม่ แสดง id ที่ได้
     list                              -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]
     list [--sort name]                -> แสดงงานทั้งหมดที่เรียงด้วบชื่อ พร้อมสถานะ [ ] / [x]
     list [--status pending|completed] -> แสดงงานทั้งหมดที่มีสถานะเสร็จสิ้น หรือกำลังรอ พร้อมสถานะ [ ] / [x]
@@ -245,19 +288,19 @@ rl.on('line', (rawLine: string) => {
     help                              -> แสดงรายการคําสั่ง
     exit                              -> ออกจากโปรแกรม`)
 
-    } else if (command == "exit") {
-        if (argument) {
-            console.log("Invalid command. Usage: exit")
-            return
-        }
+            } else if (command == "exit") {
+                if (argument) {
+                    console.log("Invalid command. Usage: exit")
+                    return
+                }
 
-        console.log(`Bye!`)
-        process.stdin.unref()
-        isExited = true
-        
-    } else {
-        console.log(`Unknown command. Type "help"`)
+                console.log(`Bye!`)
+                process.stdin.unref()
+                isExited = true
+                
+            } else {
+                console.log(`Unknown command. Type "help"`)
+            }
+        })
     }
 })
-
-
