@@ -42,17 +42,17 @@ const sortList = (displayTasks: Task[]) => {
     return sortTasks
 }
 
-const list = (tasks: Task[], option?: string) => {
+const listTask = (tasks: Task[], option?: string) => {
     let displayTasks = tasks
 
     if (option) {
         const optionSplit = option.split(/[ \t]+/)
         let i = 0
-        let isSorted = false
-        let isStatus = false
+        let hasSorted = false
+        let hasStatus = false
 
         while (i < optionSplit.length) {
-            if (optionSplit[i] == "--sort" && !isSorted) {
+            if (optionSplit[i] == "--sort" && !hasSorted) {
                 if (optionSplit[i+1] == "name") {
                     displayTasks = sortList(displayTasks)
 
@@ -61,10 +61,10 @@ const list = (tasks: Task[], option?: string) => {
                     return
                 }
 
-                isSorted = true
+                hasSorted = true
                 i += 2
 
-            } else if (optionSplit[i] == "--status" && !isStatus) {
+            } else if (optionSplit[i] == "--status" && !hasStatus) {
                 if (optionSplit[i+1] == "pending") {
                     displayTasks = displayTasks.filter((task) => !task.isCompleted)
 
@@ -76,7 +76,7 @@ const list = (tasks: Task[], option?: string) => {
                     return
                 }
 
-                isStatus = true
+                hasStatus = true
                 i += 2
 
             } else {
@@ -97,10 +97,10 @@ const list = (tasks: Task[], option?: string) => {
                 console.log(`[x] ${task.id}. ${task.name}`)
             }
         }
+
     } else {
         console.log("No todos")
     }
-    
 }
 
 const parseId = (argument: string) => {
@@ -224,7 +224,7 @@ rl.on('line', (rawLine: string) => {
 
     } else if (command == "list") {
         if (tasks.length != 0) {
-            list(tasks, argument)
+            listTask(tasks, argument)
             
         } else {
             console.log("No todos")
