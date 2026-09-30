@@ -30,8 +30,8 @@ const deleteTask = (tasks: Task[], index: number) => {
     tasks.splice(index, 1)
 }
 
-const sortList = (displayTasks: Task[]) => {
-    let sortTasks = [...displayTasks].sort((a,b) => {
+const sortTasks = (displayTasks: Task[]) => {
+    let sortedTasks = [...displayTasks].sort((a,b) => {
         if (a.name < b.name) return -1
 
         if (a.name > b.name) return 1
@@ -39,7 +39,7 @@ const sortList = (displayTasks: Task[]) => {
         return 0
     })
 
-    return sortTasks
+    return sortedTasks
 }
 
 const listTasks = (tasks: Task[], option?: string) => {
@@ -54,7 +54,7 @@ const listTasks = (tasks: Task[], option?: string) => {
         while (i < optionSplit.length) {
             if (optionSplit[i] == "--sort" && !hasSorted) {
                 if (optionSplit[i+1] == "name") {
-                    displayTasks = sortList(displayTasks)
+                    displayTasks = sortTasks(displayTasks)
 
                 } else {
                     console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
