@@ -42,7 +42,7 @@ const sortList = (displayTasks: Task[]) => {
     return sortTasks
 }
 
-const listTask = (tasks: Task[], option?: string) => {
+const listTasks = (tasks: Task[], option?: string) => {
     let displayTasks = tasks
 
     if (option) {
@@ -224,7 +224,7 @@ rl.on('line', (rawLine: string) => {
 
     } else if (command == "list") {
         if (tasks.length != 0) {
-            listTask(tasks, argument)
+            listTasks(tasks, argument)
             
         } else {
             console.log("No todos")
