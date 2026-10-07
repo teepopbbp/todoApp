@@ -48,8 +48,15 @@ export const createTodoList = () => {
         }
     }
 
-    const remove = (id: number) => {
-        return deleteTask(tasks, id - 1)
+    const remove = (taskId: number) => {
+        let index = tasks.findIndex((task) => task.id == taskId)
+
+        if (index >= 0) {
+            return deleteTask(tasks, index)
+
+        } else {
+            return
+        }
     }
 
     const list = () => {
