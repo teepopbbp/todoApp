@@ -9,7 +9,7 @@ export type ListOption = {
     status?: "pending" | "completed"
 }
 
-const sortTasks = (displayTasks: Task[]) => {
+const sortTasks = (displayTasks: Task[]): Task[] => {
     let sortedTasks = [...displayTasks].sort((a,b) => {
         if (a.name < b.name) return -1
 
@@ -26,7 +26,7 @@ export const createTodoList = () => {
 
     let idTrack = 1
 
-    const add = (taskName: string) => {
+    const add = (taskName: string): void => {
         const trimmedTaskName = taskName.trim()
 
         if (trimmedTaskName === "") {
@@ -42,7 +42,7 @@ export const createTodoList = () => {
         )
     }
 
-    const done = (taskId: number) => {
+    const done = (taskId: number): void => {
         let index = tasks.findIndex((task) => task.id == taskId)
 
         if (index >= 0) {
@@ -53,7 +53,7 @@ export const createTodoList = () => {
         }
     }
 
-    const remove = (taskId: number) => {
+    const remove = (taskId: number): void => {
         let index = tasks.findIndex((task) => task.id == taskId)
 
         if (index >= 0) {
@@ -64,7 +64,7 @@ export const createTodoList = () => {
         }
     }
     
-    const list = (options?: ListOption) => {
+    const list = (options?: ListOption): Task[] => {
         let displayTasks = tasks
 
         if (options) {

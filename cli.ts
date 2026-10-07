@@ -5,7 +5,7 @@ let isExited = false
 
 const todos = createTodoList()
 
-const parseId = (argument: string) => {
+const parseId = (argument: string): number | null => {
     let allowArgs = /^[0-9]+$/
     const idMatch = argument.match(allowArgs)
 
@@ -22,7 +22,7 @@ const parseId = (argument: string) => {
     return id
 }
 
-const sortTasks = (displayTasks: Task[]) => {
+const sortTasks = (displayTasks: Task[]): Task[] => {
     let sortedTasks = [...displayTasks].sort((a,b) => {
         if (a.name < b.name) return -1
 
