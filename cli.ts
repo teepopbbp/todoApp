@@ -1,5 +1,5 @@
 import readline from "readline"
-import { type Task, createTodoList } from "./todo.ts"
+import { type Task, type ListOption, createTodoList } from "./todo.ts"
 
 let isExited = false
 
@@ -22,65 +22,10 @@ const parseId = (argument: string): number | null => {
     return id
 }
 
-const sortTasks = (displayTasks: Task[]): Task[] => {
-    let sortedTasks = [...displayTasks].sort((a,b) => {
-        if (a.name < b.name) return -1
-
-        if (a.name > b.name) return 1
-
-        return 0
-    })
-
-    return sortedTasks
-}
-
-const listTasks = (tasks: Task[], option?: string) => {
-    let displayTasks = tasks
-
-    if (option) {
-        const splitOptions = option.split(/[ \t]+/)
-        let i = 0
-        let hasSortOption = false
-        let hasStatusOption = false
-
-        while (i < splitOptions.length) {
-            if (splitOptions[i] == "--sort" && !hasSortOption) {
-                if (splitOptions[i+1] == "name") {
-                    displayTasks = sortTasks(displayTasks)
-
-                } else {
-                    console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
-                    return
-                }
-
-                hasSortOption = true
-                i += 2
-
-            } else if (splitOptions[i] == "--status" && !hasStatusOption) {
-                if (splitOptions[i+1] == "pending") {
-                    displayTasks = displayTasks.filter((task) => !task.isCompleted)
-
-                } else if (splitOptions[i+1] == "completed") {
-                    displayTasks = displayTasks.filter((task) => task.isCompleted)
-
-                } else {
-                    console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
-                    return
-                }
-
-                hasStatusOption = true
-                i += 2
-
-            } else {
-                console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
-                return
-            }
-        }
-    }
-
-    if (displayTasks.length != 0) {
-        for (let i = 0; i < displayTasks.length; i++) {
-            const task = displayTasks[i];
+const printOutTasks = (tasks: Task[]) => {
+    if (tasks.length != 0) {
+        for (let i = 0; i < tasks.length; i++) {
+            const task = tasks[i];
 
             if (!task.isCompleted) {
                 console.log(`[ ] ${task.id}. ${task.name}`)
@@ -201,7 +146,50 @@ rl.on('line', (rawLine: string) => {
 
     } else if (command == "list") {
         if (tasks.length != 0) {
-            listTasks(tasks, argument)
+            let displayTasks = tasks
+
+            if (argument) {
+                let option: ListOption = {}
+
+                const splitOptions = argument.split(/[ \t]+/)
+                let i = 0
+
+                while (i < splitOptions.length) {
+                    if (splitOptions[i] == "--sort"  && option.sort != "name") {
+                        if (splitOptions[i+1] == "name") {
+                            option.sort = "name"
+
+                        } else {
+                            console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                            return
+                        }
+
+                        i += 2
+
+                    } else if (splitOptions[i] == "--status" && !option.status) {
+                        if (splitOptions[i+1] == "pending") {
+                            option.status = "pending"
+
+                        } else if (splitOptions[i+1] == "completed") {
+                            option.status = "completed"
+
+                        } else {
+                            console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                            return
+                        }
+
+                        i += 2
+
+                    } else {
+                        console.log("Invalid command. Usage: list [--sort name] [--status pending|completed]")
+                        return
+                    }
+                }
+
+                displayTasks = todos.list(option)
+            }
+
+            printOutTasks(displayTasks)
             
         } else {
             console.log("No todos")
