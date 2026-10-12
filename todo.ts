@@ -9,6 +9,13 @@ export type ListOption = {
     status?: "pending" | "completed"
 }
 
+interface TodoList {
+    add: (taskName: string) => Task | null
+    done: (taskId: number) => Task | null
+    delete: (taskId: number) => Task | null
+    list: (options?: ListOption) => Task[]
+}
+
 const sortTasks = (displayTasks: Task[]): Task[] => {
     let sortedTasks = [...displayTasks].sort((a,b) => {
         if (a.name < b.name) return -1
@@ -21,46 +28,48 @@ const sortTasks = (displayTasks: Task[]): Task[] => {
     return sortedTasks
 }
 
-export const createTodoList = () => {
+export const createTodoList = (): TodoList => {
     let tasks:Task[] = []
 
     let idTrack = 1
 
-    const add = (taskName: string): void => {
+    const add = (taskName: string): Task | null => {
         const trimmedTaskName = taskName.trim()
 
         if (trimmedTaskName === "") {
-            return
+            return null
         }
 
-        tasks.push (
-            {
-                id: idTrack++,
-                name: trimmedTaskName,
-                isCompleted: false
-            }   
-        )
+        const task: Task = {
+            id: idTrack++,
+            name: trimmedTaskName,
+            isCompleted: false
+        }
+        
+        tasks.push(task)
+        return task
     }
 
-    const done = (taskId: number): void => {
+    const done = (taskId: number): Task | null => {
         let index = tasks.findIndex((task) => task.id == taskId)
 
         if (index >= 0) {
             tasks[index].isCompleted = true
+            return tasks[index]
 
         } else {
-            return
+            return null
         }
     }
 
-    const remove = (taskId: number): void => {
+    const remove = (taskId: number): Task | null => {
         let index = tasks.findIndex((task) => task.id == taskId)
 
         if (index >= 0) {
-            tasks.splice(index, 1)
+            return tasks.splice(index, 1)[0]
 
         } else {
-            return
+            return null
         }
     }
     
