@@ -4,7 +4,7 @@ export type Task = {
     isCompleted : boolean
 }
 
-export type ListOption = {
+export type ListCommandOption = {
     sort?: "name"
     status?: "pending" | "completed"
 }
@@ -13,7 +13,7 @@ interface TodoList {
     add: (taskName: string) => Task | null
     done: (taskId: number) => Task | null
     delete: (taskId: number) => Task | null
-    list: (options?: ListOption) => Task[]
+    list: (options?: ListCommandOption) => Task[]
 }
 
 const sortTasks = (displayTasks: Task[]): Task[] => {
@@ -73,7 +73,7 @@ export const createTodoList = (): TodoList => {
         }
     }
     
-    const list = (options?: ListOption): Task[] => {
+    const list = (options?: ListCommandOption): Task[] => {
         let displayTasks = tasks
 
         if (options) {

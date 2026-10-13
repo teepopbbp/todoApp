@@ -1,13 +1,13 @@
 import readline from "readline"
-import { type Task, type ListOption, createTodoList } from "./todo.ts"
+import { type Task, type ListCommandOption, createTodoList } from "./todo.ts"
 
 let isExited = false
 
 const todos = createTodoList()
 
 const parseId = (argument: string): number | null => {
-    let allowArgs = /^[0-9]+$/
-    const idMatch = argument.match(allowArgs)
+    let allowedArgs = /^[0-9]+$/
+    const idMatch = argument.match(allowedArgs)
 
     const id = parseInt(argument)
 
@@ -82,14 +82,14 @@ rl.on('line', (rawLine: string) => {
             return
         }
 
-        let argumentSplit = argument.split(/[ \t]+/)
+        let splitArgument = argument.split(/[ \t]+/)
 
-        if (argumentSplit.length != 1) {
+        if (splitArgument.length != 1) {
             console.log("Invalid command. Usage: done <id>")
             return
         }
 
-        let taskId = parseId(argumentSplit[0])
+        let taskId = parseId(splitArgument[0])
 
         if (!taskId) {
             console.log("Invalid command. Usage: done <id>")
@@ -149,7 +149,7 @@ rl.on('line', (rawLine: string) => {
             let displayTasks = tasks
 
             if (argument) {
-                let option: ListOption = {}
+                let option: ListCommandOption = {}
 
                 const splitOptions = argument.split(/[ \t]+/)
                 let i = 0
