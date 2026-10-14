@@ -39,6 +39,27 @@ const printOutTasks = (tasks: Task[]) => {
         console.log("No todos")
     }
 }
+const parseOutputFormat = (argument:string[]) => {
+    if (argument.length == 0) {
+        return "text"
+    }
+
+    if (argument[0] == "--output" && (
+        argument[1] == "text" || argument[1] == "json")) {
+        return argument[1]
+        
+    } else {
+        return null
+    }
+}
+
+const outputArguments = process.argv.slice(2)
+
+const outputFormat = parseOutputFormat(outputArguments)
+
+if (outputFormat == null) {
+    process.exit()
+}
 
 const rl = readline.createInterface (
     {
