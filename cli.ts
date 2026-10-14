@@ -1,6 +1,26 @@
 import readline from "readline"
 import { type Task, type ListCommandOption, createTodoList } from "./todo.ts"
 
+type SuccessResult = {
+    isSuccessful: true
+    action: "add" | "list" | "done" | "delete" | "help"
+    todo?: Task
+    todos?: Task[]
+    id?: number
+}
+
+type ErrorResult = {
+    isSuccessful: false
+    error: {
+        code: "UNKNOWN_COMMAND" | "INVALID_COMMAND" | "TODO_NOT_FOUND"
+        message: string
+        id?: number
+    }
+}
+
+type Result = SuccessResult | ErrorResult
+
+
 let isExited = false
 
 const todos = createTodoList()
