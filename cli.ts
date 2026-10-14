@@ -68,12 +68,14 @@ rl.on('line', (rawLine: string) => {
 
         if (!taskName) {
             console.log("Invalid command. Usage: add <name>")
+            return
+        }
 
+        const addedTask = todos.add(taskName);
+        if (addedTask == null) {
+            console.log("Invalid command. Usage: add <name>")
         } else {
-            todos.add(taskName);
-            const taskId = tasks[tasks.length - 1].id
-
-            console.log(`Added #${taskId}: ${taskName}`)
+            console.log(`Added #${addedTask.id}: ${taskName}`)
         }
 
     } else if (command == "done") {
@@ -98,9 +100,13 @@ rl.on('line', (rawLine: string) => {
             let index = tasks.findIndex((task) => task.id == taskId)
 
             if (index >= 0) {
-                todos.done(taskId)
+                const completedTask = todos.done(taskId)
 
-                console.log(`Completed #${taskId}`)
+                if (completedTask == null) {
+                    console.log("Invalid command. Usage: add <name>")
+                } else {
+                    console.log(`Completed #${completedTask.id}`)
+                }
 
             } else {
                 console.log(`Todo #${taskId} not found`)
@@ -132,9 +138,13 @@ rl.on('line', (rawLine: string) => {
             let index = tasks.findIndex((task) => task.id == taskId)
             
             if (index >= 0) {
-                todos.delete(taskId)
+                const deletedTask = todos.delete(taskId)
 
-                console.log(`Deleted #${taskId}`)
+                if (deletedTask == null) {
+                    console.log("Invalid command. Usage: add <name>")
+                } else {
+                    console.log(`Deleted #${deletedTask.id}`)
+                }
 
             } else {
                 console.log(`Todo #${taskId} not found`)
