@@ -14,6 +14,8 @@ type Success<T> = {
     todo?: Task
     todos?: Task[]
     id?: number
+    command?: string[]
+    outputModes?: string[]
 }
 
 type Error = {
@@ -192,7 +194,13 @@ const handleCommand = (command: string, argument?: string): Result<"add"|"done"|
             }
         }
         
-        return {isSuccessful:true, success: {action:"help"}}
+        return {isSuccessful:true, success: {
+            action:"help", 
+            command: [
+                "add <name>", "list [--sort name] [--status pending|completed]", "done <id>", "delete <id>", "help", "exit"
+            ], 
+            outputModes: ["text", "json"]
+        }}
 
     } else if (command == "exit") {
         if (argument) {
@@ -287,7 +295,7 @@ const printText = (result: Result<"add"|"done"|"delete"|"list"|"help"|"exit">) =
     delete <id>                       -> ลบงาน
     help                              -> แสดงรายการคําสั่ง
     exit                              -> ออกจากโปรแกรม`)
-    
+
         } else if (result.success.action == "exit") {
             console.log(`Bye!`)
         }
