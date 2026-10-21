@@ -74,7 +74,7 @@ const handleCommand = (command: string, argument?: string): Result<"add"|"done"|
             return {isSuccessful: true, success: {action: "add", todo: addedTask}}
         }
 
-    } else if (command = "done") {
+    } else if (command == "done") {
         if (!argument) {
             return  {
                 isSuccessful: false,
@@ -120,7 +120,7 @@ const handleCommand = (command: string, argument?: string): Result<"add"|"done"|
             }
         }
 
-        const deletedTask = todos.done(taskId)
+        const deletedTask = todos.delete(taskId)
 
         if (deletedTask == null) {
             return {
@@ -261,6 +261,46 @@ const parseOutputFormat = (argument:string[]) => {
     }
 }
 
+const printText = (result: Result<"add"|"done"|"delete"|"list"|"help"|"exit">) => {
+    if (result.isSuccessful) {
+        if (result.success.todo) {
+            const task = result.success.todo
+            console.log(`Added #${task.id}: ${task.name}`)
+
+        } else if (result.success.action == "done" && result.success.id) {
+            const id = result.success.id
+            console.log(`Completed #${id}`)
+
+        } else if (result.success.action == "delete" && result.success.id) {
+            const id = result.success.id
+            console.log(`Deleted #${id}`)
+
+        } else if (result.success.todos) {
+            printOutTasks(result.success.todos)
+
+        } else if (result.success.action == "help") {
+            console.log(`    add <ชื่องาน>                       -> เพิ่มงานใหม่ แสดง id ที่ได้
+    list                              -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]
+    list [--sort name]                -> แสดงงานทั้งหมดที่เรียงด้วบชื่อ พร้อมสถานะ [ ] / [x]
+    list [--status pending|completed] -> แสดงงานทั้งหมดที่มีสถานะเสร็จสิ้น หรือกำลังรอ พร้อมสถานะ [ ] / [x]
+    done <id>                         -> ทําเครื่องหมายว่าเสร็จ
+    delete <id>                       -> ลบงาน
+    help                              -> แสดงรายการคําสั่ง
+    exit                              -> ออกจากโปรแกรม`)
+    
+        } else if (result.success.action == "exit") {
+            console.log(`Bye!`)
+        }
+
+    } else if (!result.isSuccessful) {
+        console.log(result.error.message)
+    }
+}
+
+const printJson = (result: Result<"add"|"done"|"delete"|"list"|"help"|"exit">) => {
+    console.log(JSON.stringify(result))
+}
+
 const outputArguments = process.argv.slice(2)
 
 const outputFormat = parseOutputFormat(outputArguments)
@@ -294,6 +334,12 @@ rl.on('line', (rawLine: string) => {
     const argument = match[2]
 
     const result = handleCommand(command, argument)
+
+    if (outputFormat == "text") {
+        printText(result)
+    } else if (outputFormat == "json") {
+        printJson(result)
+    }
 
     if (!result) {
         return
