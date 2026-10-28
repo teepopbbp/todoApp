@@ -1,145 +1,67 @@
 import readline from "readline"
-import { type Task, type ListCommandOption, createTodoList } from "./todo.ts"
+import { type TodoList, createTodoList, errorInvalidCommand, errorUnknownCommand, type ListCommandOption } from "./todo.ts"
+import { type OutputFormat, createPresenter, CLIPresenter, JSONPresenter} from "./presenter.ts"
 
-type Result<T> = {
-    isSuccessful: true
-    success: Success<T>
-} | {
-    isSuccessful: false
-    error: Error
-}
-
-type Success<T> = {
-    action: T
-    todo?: Task
-    todos?: Task[]
-    id?: number
-    command?: string[]
-    outputModes?: string[]
-}
-
-type Error = {
-    code: "UNKNOWN_COMMAND"
-    message: string
-} | {
-    code: "INVALID_COMMAND"
-    message: string
-} | {
-    code: "TODO_NOT_FOUND"
-    message: string
-    id: number
-}
-
-const todos = createTodoList()
-const tasks = todos.list()
-
-const errorInvalidCommand = (usage: string): Error => {
-    return {
-        code: "INVALID_COMMAND", 
-        message: `Invalid command. Usage: ${usage}`
-    }
-}
-
-const errorTodoNotFound = (id: number): Error => {
-    return {
-        code: "TODO_NOT_FOUND",
-        message: `Todo #${id} not found`,
-        id: id
-    }
-}
-
-const errorUnknownCommand = (): Error => {
-    return {
-        code: "UNKNOWN_COMMAND",
-        message: `Unknown command. Type \"help\"`
-    }
-}
-
-const handleCommand = (command: string, argument?: string): Result<"add"|"done"|"delete"|"list"|"help"|"exit"> => {
+const handleConsoleCommand = (
+    todos: TodoList, presenter: CLIPresenter | JSONPresenter , command: string, argument?: string): string => {
     if (command == "add") {
         if (!argument) {
-            return  {
-                isSuccessful: false,
-                error: errorInvalidCommand("add <name>")
-            }
+            return presenter.error(errorInvalidCommand("add <name>"))
         }
 
-        const addedTask = todos.add(argument);
+        const addedTask = todos.add(argument)
 
-        if (addedTask == null) {
-            return  {
-                isSuccessful: false,
-                error: errorInvalidCommand("add <name>")
-            }
+        if (addedTask.isSuccessful) {
+            return presenter.added(addedTask.value)
 
         } else {
-            return {isSuccessful: true, success: {action: "add", todo: addedTask}}
+            return presenter.error(addedTask.error)
         }
 
     } else if (command == "done") {
         if (!argument) {
-            return  {
-                isSuccessful: false,
-                error:  errorInvalidCommand("done <id>")
-            }
+            return presenter.error(errorInvalidCommand("done <id>"))
         }
 
-        let taskId = parseId(argument)
+        const taskId = parseId(argument)
 
         if (!taskId) {
-            return {
-                isSuccessful: false,
-                error: errorInvalidCommand("done <id>")
-            }
+            return presenter.error(errorInvalidCommand("done <id>"))
         }
 
         const completedTask = todos.done(taskId)
 
-        if (completedTask == null) {
-            return {
-                isSuccessful: false,
-                error: errorTodoNotFound(taskId)
-            }
+        if (completedTask.isSuccessful) {
+            return presenter.completed(taskId)
 
         } else {
-            return {isSuccessful: true, success: {action: "done", id: completedTask.id}}
+            return presenter.error(completedTask.error)
         }
     
     } else if (command == "delete") {
         if (!argument) {
-            return {
-                isSuccessful: false,
-                error: errorInvalidCommand("delete <id>")
-            }
+            return presenter.error(errorInvalidCommand("delete <id>"))
         }
 
-        let taskId = parseId(argument)
+        const taskId = parseId(argument)
 
         if (!taskId) {
-            return {
-                isSuccessful: false,
-                error: errorInvalidCommand("delete <id>")
-            }
+            return presenter.error(errorInvalidCommand("delete <id>"))
         }
 
         const deletedTask = todos.delete(taskId)
 
-        if (deletedTask == null) {
-            return {
-                isSuccessful: false,
-                error: errorTodoNotFound(taskId)
-            }
+        if (deletedTask.isSuccessful) {
+            return presenter.deleted(taskId)
 
         } else {
-            return {isSuccessful: true, success: {action: "delete", id: deletedTask.id}}
+            return presenter.error(deletedTask.error)
         }
 
     } else if (command == "list") {
-        let displayTasks = tasks
+        let option: ListCommandOption = {}
 
         if (argument) {
-            let option: ListCommandOption = {}
-
             const splitOptions = argument.split(/[ \t]+/)
             let i = 0
 
@@ -149,10 +71,9 @@ const handleCommand = (command: string, argument?: string): Result<"add"|"done"|
                         option.sort = "name"
 
                     } else {
-                        return {
-                            isSuccessful: false,
-                            error: errorInvalidCommand("list [--sort name] [--status pending|completed]")
-                        }
+                        return presenter.error(
+                            errorInvalidCommand("list [--sort name] [--status pending|completed]")
+                        )
                     }
 
                     i += 2
@@ -165,58 +86,41 @@ const handleCommand = (command: string, argument?: string): Result<"add"|"done"|
                         option.status = "completed"
 
                     } else {
-                        return {
-                            isSuccessful: false,
-                            error: errorInvalidCommand("list [--sort name] [--status pending|completed]")
-                        }
+                        return presenter.error(
+                            errorInvalidCommand("list [--sort name] [--status pending|completed]")
+                        )
                     }
 
                     i += 2
 
                 } else {
-                    return {
-                        isSuccessful: false,
-                        error: errorInvalidCommand("list [--sort name] [--status pending|completed]")
-                    }
+                    return presenter.error(
+                            errorInvalidCommand("list [--sort name] [--status pending|completed]")
+                    )
                 }
             }
-
-            displayTasks = todos.list(option)
         }
 
-        return {isSuccessful:true, success: {action:"list", todos: displayTasks}}
+        const displayTasks = todos.list(option)
 
+        return presenter.listed(displayTasks)
+        
     } else if (command == "help") {
         if (argument) {
-            return {
-                isSuccessful: false,
-                error: errorInvalidCommand("help")
-            }
+            return presenter.error(errorInvalidCommand("help"))
         }
         
-        return {isSuccessful:true, success: {
-            action:"help", 
-            command: [
-                "add <name>", "list [--sort name] [--status pending|completed]", "done <id>", "delete <id>", "help", "exit"
-            ], 
-            outputModes: ["text", "json"]
-        }}
+        return presenter.helped()
 
     } else if (command == "exit") {
         if (argument) {
-            return {
-                isSuccessful: false,
-                error: errorInvalidCommand("exit")
-            }
+            return presenter.error(errorInvalidCommand("exit"))
         }
 
-        return {isSuccessful:true, success: {action:"exit"}}      
+        return presenter.exited()
 
     } else {
-        return {
-            isSuccessful: false,
-            error: errorUnknownCommand()
-        }
+        return presenter.error(errorUnknownCommand())
     }
 }
 
@@ -237,25 +141,7 @@ const parseId = (argument: string): number | null => {
     return id
 }
 
-const printOutTasks = (tasks: Task[]) => {
-    if (tasks.length != 0) {
-        for (let i = 0; i < tasks.length; i++) {
-            const task = tasks[i];
-
-            if (!task.isCompleted) {
-                console.log(`[ ] ${task.id}. ${task.name}`)
-
-            } else {
-                console.log(`[x] ${task.id}. ${task.name}`)
-            }
-        }
-
-    } else {
-        console.log("No todos")
-    }
-}
-
-const parseOutputFormat = (argument:string[]) => {
+const parseOutputFormat = (argument:string[]): OutputFormat | null => {
     if (argument.length == 0) {
         return "text"
     }
@@ -267,46 +153,6 @@ const parseOutputFormat = (argument:string[]) => {
     } else {
         return null
     }
-}
-
-const printText = (result: Result<"add"|"done"|"delete"|"list"|"help"|"exit">) => {
-    if (result.isSuccessful) {
-        if (result.success.todo) {
-            const task = result.success.todo
-            console.log(`Added #${task.id}: ${task.name}`)
-
-        } else if (result.success.action == "done" && result.success.id) {
-            const id = result.success.id
-            console.log(`Completed #${id}`)
-
-        } else if (result.success.action == "delete" && result.success.id) {
-            const id = result.success.id
-            console.log(`Deleted #${id}`)
-
-        } else if (result.success.todos) {
-            printOutTasks(result.success.todos)
-
-        } else if (result.success.action == "help") {
-            console.log(`    add <ชื่องาน>                       -> เพิ่มงานใหม่ แสดง id ที่ได้
-    list                              -> แสดงงานทั้งหมด พร้อมสถานะ [ ] / [x]
-    list [--sort name]                -> แสดงงานทั้งหมดที่เรียงด้วบชื่อ พร้อมสถานะ [ ] / [x]
-    list [--status pending|completed] -> แสดงงานทั้งหมดที่มีสถานะเสร็จสิ้น หรือกำลังรอ พร้อมสถานะ [ ] / [x]
-    done <id>                         -> ทําเครื่องหมายว่าเสร็จ
-    delete <id>                       -> ลบงาน
-    help                              -> แสดงรายการคําสั่ง
-    exit                              -> ออกจากโปรแกรม`)
-
-        } else if (result.success.action == "exit") {
-            console.log(`Bye!`)
-        }
-
-    } else if (!result.isSuccessful) {
-        console.log(result.error.message)
-    }
-}
-
-const printJson = (result: Result<"add"|"done"|"delete"|"list"|"help"|"exit">) => {
-    console.log(JSON.stringify(result))
 }
 
 const outputArguments = process.argv.slice(2)
@@ -325,6 +171,9 @@ const rl = readline.createInterface (
 
 let isExited = false
 
+const todos = createTodoList()
+const presenter = createPresenter(outputFormat)
+
 rl.on('line', (rawLine: string) => {
     if (isExited == true) {
             return
@@ -341,18 +190,13 @@ rl.on('line', (rawLine: string) => {
     const command = match[1]
     const argument = match[2]
 
-    const result = handleCommand(command, argument)
-
-    if (outputFormat == "text") {
-        printText(result)
-    } else if (outputFormat == "json") {
-        printJson(result)
-    }
+    const result = handleConsoleCommand(todos, presenter, command, argument)
+    console.log(result)
 
     if (!result) {
         return
 
-    } else if (result.isSuccessful && result.success.action == "exit") {
+    } else if (result == presenter.exited()) {
         process.stdin.unref()
         isExited = true
     }
