@@ -45,7 +45,7 @@ export const errorUnknownCommand = (): Error => {
     }
 }
 
-interface TodoList {
+export interface TodoList {
     add: (taskName: string) => Result<Task>
     done: (taskId: number) => Result<number>
     delete: (taskId: number) => Result<number>
