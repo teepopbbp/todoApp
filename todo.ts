@@ -9,11 +9,47 @@ export type ListCommandOption = {
     status?: "pending" | "completed"
 }
 
+export type Result<T> = {
+    isSuccessful: true
+    value: T
+} | {
+    isSuccessful: false
+    error: Error
+}
+
+export type Error = {
+    code: "INVALID_COMMAND" | "TODO_NOT_FOUND" | "UNKNOWN_COMMAND"
+    message: string
+    id?: number
+}
+
+export const errorInvalidCommand = (usage: string): Error => {
+    return {
+        code: "INVALID_COMMAND", 
+        message: `Invalid command. Usage: ${usage}`
+    }
+}
+
+export const errorTodoNotFound = (id: number): Error => {
+    return {
+        code: "TODO_NOT_FOUND",
+        message: `Todo #${id} not found`,
+        id: id
+    }
+}
+
+export const errorUnknownCommand = (): Error => {
+    return {
+        code: "UNKNOWN_COMMAND",
+        message: `Unknown command. Type \"help\"`
+    }
+}
+
 interface TodoList {
-    add: (taskName: string) => Task | null
-    done: (taskId: number) => Task | null
-    delete: (taskId: number) => Task | null
-    list: (options?: ListCommandOption) => Task[]
+    add: (taskName: string) => Result<Task>
+    done: (taskId: number) => Result<number>
+    delete: (taskId: number) => Result<number>
+    list: (options?: ListCommandOption) =>Task[]
 }
 
 const sortTasks = (displayTasks: Task[]): Task[] => {
@@ -33,11 +69,14 @@ export const createTodoList = (): TodoList => {
 
     let idTrack = 1
 
-    const add = (taskName: string): Task | null => {
+    const add = (taskName: string): Result<Task> => {
         const trimmedTaskName = taskName.trim()
 
         if (trimmedTaskName === "") {
-            return null
+            return {
+                isSuccessful: false,
+                error: errorInvalidCommand("add <name>")
+            }
         }
 
         const task: Task = {
@@ -47,29 +86,60 @@ export const createTodoList = (): TodoList => {
         }
         
         tasks.push(task)
-        return task
+
+        return {
+            isSuccessful: true,
+            value: task
+        }
     }
 
-    const done = (taskId: number): Task | null => {
+    const done = (taskId: number): Result<number> => {
+        if (!taskId) {
+            return {
+                isSuccessful: false,
+                error: errorInvalidCommand("done <id>")
+            }
+        }
+
         let index = tasks.findIndex((task) => task.id == taskId)
 
         if (index >= 0) {
             tasks[index].isCompleted = true
-            return tasks[index]
+            return {
+                isSuccessful: true,
+                value: taskId
+            }
 
         } else {
-            return null
+            return {
+                isSuccessful: false,
+                error: errorTodoNotFound(taskId)
+            }
         }
     }
 
-    const remove = (taskId: number): Task | null => {
+    const remove = (taskId: number): Result<number> => {
+         if (!taskId) {
+            return {
+                isSuccessful: false,
+                error: errorInvalidCommand("delete <id>")
+            }
+        }
+
         let index = tasks.findIndex((task) => task.id == taskId)
 
         if (index >= 0) {
-            return tasks.splice(index, 1)[0]
+            tasks.splice(index, 1)
+            return {
+                isSuccessful: true,
+                value: taskId
+            }
 
         } else {
-            return null
+            return {
+                isSuccessful: false,
+                error: errorTodoNotFound(taskId)
+            }
         }
     }
     
@@ -84,7 +154,7 @@ export const createTodoList = (): TodoList => {
                 displayTasks = displayTasks.filter((task) => task.isCompleted)
             }
 
-            if (options?.sort == "name") {
+            if (options.sort == "name") {
                 displayTasks = sortTasks(displayTasks)
             }
         }
